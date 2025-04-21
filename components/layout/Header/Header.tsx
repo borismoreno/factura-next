@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Button, Navbar, Drawer, DrawerItems } from 'flowbite-react';
+import { Navbar, Drawer, DrawerItems } from 'flowbite-react';
 import { Icon } from '@iconify/react';
-import Link from 'next/link';
 import Profile from './Profile';
 import Notification from './Notification';
 import MobileSidebar from '../Sidebar/MobileSidebar';

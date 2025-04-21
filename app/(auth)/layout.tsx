@@ -2,7 +2,7 @@
 'use client';
 
 // import { useAuth } from '@/hooks/useAuth';
-import React, { useEffect } from 'react'; // Necesario para React.ReactNode
+import React from 'react'; // Necesario para React.ReactNode
 // import { useRouter } from 'next/navigation';
 
 interface AuthLayoutProps {

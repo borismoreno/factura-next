@@ -1,7 +1,6 @@
 // app/(dashboard)/layout.tsx
 'use client';
 
-import { FC } from "react";
 import Sidebar from "@/components/layout/Sidebar/Sidebar";
 import Header from "@/components/layout/Header/Header";
 import ScrollToTop from "@/components/layout/ScrollToTop/ScrollToTop";

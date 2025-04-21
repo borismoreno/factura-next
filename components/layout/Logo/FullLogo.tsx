@@ -1,6 +1,5 @@
 import Image from 'next/image';
 // import Logo from './public/next.svg';
-import Link from 'next/link';
 
 export default function FullLogo() {
     // console.log('FullLogo', Logo);

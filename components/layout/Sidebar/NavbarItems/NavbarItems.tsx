@@ -1,4 +1,4 @@
-import { ChildItem, MenuItem } from '../SidebarItems';
+import { ChildItem } from '../SidebarItems';
 import { SidebarItem } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
