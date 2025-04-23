@@ -1,6 +1,7 @@
 // lib/apiClient.ts
 import { getTokenAction } from './actions/auth.actions';
 import { logoutUser } from './auth';
+// import { logoutUser } from './auth';
 // import { getToken } from './tokenStorage'; // Usaremos helpers para el token
 
 // --- Configuración ---
@@ -66,6 +67,12 @@ async function request<T>(endpoint: string, options: ApiClientOptions = {}): Pro
             } catch (e) {
                 // Si el cuerpo no es JSON o hay otro error al parsear
                 errorData = { message: `HTTP error ${response.status}: ${response.statusText}` };
+            }
+
+
+            if (response.status === 401) {
+                // Si el error es 401 Unauthorized, intenta hacer logout
+                await logoutUser();
             }
             // Lanza un error con el mensaje de la API o un mensaje genérico
             throw new Error(errorData?.message || `Request failed with status ${response.status}`);
