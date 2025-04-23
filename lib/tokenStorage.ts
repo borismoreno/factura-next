@@ -1,7 +1,12 @@
 // lib/tokenStorage.ts
 
+// import { cookies } from "next/headers";
+
+// const AUTH_COOKIE_NAME = 'access-token';
+
 // Clave para guardar el token en localStorage
 const TOKEN_KEY = 'authToken';
+
 
 /**
  * Guarda el token de autenticación en localStorage.
@@ -32,3 +37,17 @@ export function removeToken(): void {
         localStorage.removeItem(TOKEN_KEY);
     }
 }
+
+
+// export async function removeCookie(): Promise<void> {
+//     try {
+//         const cookieStore = cookies();
+//         const token = (await cookieStore).get(AUTH_COOKIE_NAME);
+//         if (token) {
+//             // Elimina la cookie del token
+//             (await cookieStore).delete(AUTH_COOKIE_NAME);
+//         }
+//     } catch (error) {
+//         console.error('Error en removeCookie:', error);
+//     }
+// }

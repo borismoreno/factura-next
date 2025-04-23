@@ -100,6 +100,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/reset-password');
         const isProtectedPage = !isAuthPage; // Asumir que todo lo demás es protegido
 
+        console.log('user actual', user);
+
         // Si no hay usuario Y está en una página protegida -> redirigir a login
         if (!user && isProtectedPage) {
             // console.log('User not authenticated, redirecting to login from:', pathname);

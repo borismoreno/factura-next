@@ -1,4 +1,5 @@
 // lib/auth.ts
+import { logoutAction } from './actions/auth.actions';
 import { apiClient } from './apiClient';
 import { setToken, removeToken } from './tokenStorage';
 
@@ -73,14 +74,19 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
  */
 export async function logoutUser(): Promise<void> {
     try {
+
         // Llama a tu endpoint de logout si tu API lo requiere (opcional)
         // Ejemplo: await apiClient.post('/auth/logout');
         // Lo más importante es eliminar el token localmente
         removeToken();
+        logoutAction();
+        // removeCookie();
     } catch (error) {
         console.error('Error en logoutUser:', error);
         // Aún si falla la llamada a la API, debemos limpiar el token local
         removeToken();
+        logoutAction();
+        // removeCookie();
         // Opcionalmente, puedes decidir si re-lanzar el error o no
         // throw error;
     }
@@ -93,6 +99,7 @@ export async function logoutUser(): Promise<void> {
  */
 export async function getCurrentUser(): Promise<User | null> {
     try {
+        console.log('Llamando a getCurrentUser...');
         // Llama a un endpoint como '/auth/me' o '/users/me' que devuelva
         // los datos del usuario basado en el token 'Authorization'.
         // Ajusta el endpoint a tu API.
@@ -111,6 +118,8 @@ export async function getCurrentUser(): Promise<User | null> {
         // Puedes refinar esto verificando error.message o status code si es necesario.
         console.warn('No se pudo obtener el usuario actual (puede que no esté logueado):', error.message);
         removeToken(); // Limpiar token inválido si lo hubiera
+        logoutAction();
+        // removeCookie(); // Limpiar cookie inválida si lo hubiera
         return null;
     }
 }

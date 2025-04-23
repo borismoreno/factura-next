@@ -1,5 +1,7 @@
 // lib/apiClient.ts
-import { getToken } from './tokenStorage'; // Usaremos helpers para el token
+import { getTokenAction } from './actions/auth.actions';
+import { logoutUser } from './auth';
+// import { getToken } from './tokenStorage'; // Usaremos helpers para el token
 
 // --- Configuración ---
 // ¡IMPORTANTE! Es MUCHO mejor obtener esto de variables de entorno
@@ -26,7 +28,7 @@ interface ApiClientOptions extends RequestInit {
  */
 async function request<T>(endpoint: string, options: ApiClientOptions = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    const token = getToken(); // Obtener el token almacenado
+    const token = await getTokenAction(); // Obtener el token almacenado
 
     const defaultHeaders: HeadersInit = {
         'Accept': 'application/json',
@@ -49,6 +51,8 @@ async function request<T>(endpoint: string, options: ApiClientOptions = {}): Pro
         ...defaultHeaders,
         ...options.headers,
     };
+
+    options.credentials = 'include'; // Incluir cookies en la solicitud
 
     try {
         const response = await fetch(url, options as RequestInit); // Castear a RequestInit después de modificar
