@@ -15,7 +15,18 @@ const tableActionData = [
 ];
 
 export default async function Clientes() {
-    const clientes = await getClientes();
+
+    async function getClientesRes() {
+        try {
+            const clientes = await getClientes();
+            return clientes;
+        } catch (error) {
+            return [];
+        }
+    }
+
+    const clientes = await getClientesRes();
+
     return (
         <>
             <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
@@ -24,11 +35,13 @@ export default async function Clientes() {
                     <div className="overflow-x-auto">
                         <Table hoverable>
                             <TableHead>
-                                <TableHeadCell className="p-6 text-dark dark:text-lightgray">Nombre</TableHeadCell>
-                                <TableHeadCell>Identificación</TableHeadCell>
-                                <TableHeadCell>Mail</TableHeadCell>
-                                <TableHeadCell>Teléfono</TableHeadCell>
-                                <TableHeadCell></TableHeadCell>
+                                <TableRow>
+                                    <TableHeadCell className="p-6 text-dark dark:text-lightgray">Nombre</TableHeadCell>
+                                    <TableHeadCell>Identificación</TableHeadCell>
+                                    <TableHeadCell>Mail</TableHeadCell>
+                                    <TableHeadCell>Teléfono</TableHeadCell>
+                                    <TableHeadCell></TableHeadCell>
+                                </TableRow>
                             </TableHead>
                             <TableBody className="divide-y divide-border dark:divide-darkborder">
                                 {clientes?.map((cliente, index) => (

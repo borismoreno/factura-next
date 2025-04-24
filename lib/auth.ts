@@ -1,5 +1,5 @@
 // lib/auth.ts
-import { logoutAction } from './actions/auth.actions';
+// import { logoutAction } from './actions/auth.actions';
 import { apiClient } from './apiClient';
 import { setToken, removeToken } from './tokenStorage';
 
@@ -78,9 +78,7 @@ export async function logoutUser(): Promise<void> {
         // Llama a tu endpoint de logout si tu API lo requiere (opcional)
         // Ejemplo: await apiClient.post('/auth/logout');
         // Lo más importante es eliminar el token localmente
-        console.log('Llamando a logoutUser...');
         await apiClient.post('/auth/logout');
-        console.log('Logout exitoso, eliminando token...');
         removeToken();
         // logoutAction();
         // removeCookie();
@@ -102,13 +100,12 @@ export async function logoutUser(): Promise<void> {
  */
 export async function getCurrentUser(): Promise<User | null> {
     try {
-        console.log('Llamando a getCurrentUser...');
         // Llama a un endpoint como '/auth/me' o '/users/me' que devuelva
         // los datos del usuario basado en el token 'Authorization'.
         // Ajusta el endpoint a tu API.
         const response = await apiClient.get<LoginResponse>('/auth/me');
         if (response.token && response.user) {
-            setToken(response.token); // Guarda el token recibido
+            // setToken(response.token); // Guarda el token recibido
             return response.user;
         } else {
             // Si la API devuelve 2xx pero no el token/user esperado
@@ -120,8 +117,8 @@ export async function getCurrentUser(): Promise<User | null> {
         // Por ahora, asumimos que cualquier error aquí significa no autenticado.
         // Puedes refinar esto verificando error.message o status code si es necesario.
         console.warn('No se pudo obtener el usuario actual (puede que no esté logueado):', error.message);
-        removeToken(); // Limpiar token inválido si lo hubiera
-        logoutAction();
+        // removeToken(); // Limpiar token inválido si lo hubiera
+        // logoutAction();
         // removeCookie(); // Limpiar cookie inválida si lo hubiera
         return null;
     }

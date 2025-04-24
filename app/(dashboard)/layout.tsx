@@ -13,25 +13,25 @@ interface FullLayoutProps {
 }
 const FullLayout = ({ children }: FullLayoutProps) => {
     const { user, loading } = useAuth();
-    // const router = useRouter();
+    const router = useRouter();
 
-    // useEffect(() => {
-    //     if (!loading && !user) {
-    //         router.push('/login');
-    //     }
-    // }, [user, loading, router]);
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [user, loading, router]);
 
-    // if (loading) {
-    //     return (
-    //         <div className="flex min-h-screen items-center justify-center text-lg font-semibold text-gray-600">
-    //             Cargando...
-    //         </div>
-    //     );
-    // }
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center text-lg font-semibold text-gray-600">
+                Cargando...
+            </div>
+        );
+    }
 
-    // if (!user) {
-    //     return null; // Redirección en proceso
-    // }
+    if (!user) {
+        return null; // Redirección en proceso
+    }
 
     return (
         <>
