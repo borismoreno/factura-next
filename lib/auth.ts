@@ -79,13 +79,13 @@ export async function logoutUser(): Promise<void> {
         // Ejemplo: await apiClient.post('/auth/logout');
         // Lo más importante es eliminar el token localmente
         await apiClient.post('/auth/logout');
-        removeToken();
+        // removeToken();
         // logoutAction();
         // removeCookie();
     } catch (error) {
         console.error('Error en logoutUser:', error);
         // Aún si falla la llamada a la API, debemos limpiar el token local
-        removeToken();
+        // removeToken();
         // logoutAction();
         // removeCookie();
         // Opcionalmente, puedes decidir si re-lanzar el error o no

@@ -1,4 +1,6 @@
 import { apiClient } from './apiClient';
+import { cookies } from 'next/headers';
+
 export interface Cliente {
     _id: string;
     activo: boolean;
@@ -10,9 +12,9 @@ export interface Cliente {
     direccion: string;
 }
 
-export async function getClientes(): Promise<Cliente[] | undefined> {
+export async function getClientes(cookies?: string): Promise<Cliente[] | undefined> {
     try {
-        const response = await apiClient.get<Cliente[]>('/cliente');
+        const response = await apiClient.get<Cliente[]>('/cliente', undefined, cookies);
         return response;
     } catch (error) {
         // if (error instanceof Error) {

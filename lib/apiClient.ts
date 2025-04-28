@@ -1,5 +1,5 @@
 // lib/apiClient.ts
-import { getTokenAction } from './actions/auth.actions';
+// import { getTokenAction } from './actions/auth.actions';
 import { logoutUser } from './auth';
 // import { logoutUser } from './auth';
 // import { getToken } from './tokenStorage'; // Usaremos helpers para el token
@@ -27,9 +27,10 @@ interface ApiClientOptions extends RequestInit {
  * @returns Promise<T> La respuesta parseada de la API.
  * @throws {Error} Si la respuesta no es exitosa (status code >= 400).
  */
-async function request<T>(endpoint: string, options: ApiClientOptions = {}): Promise<T> {
+async function request<T>(endpoint: string, options: ApiClientOptions = {}, cookies?: string): Promise<T> {
+    console.log('API Client Request:', endpoint);
     const url = `${API_BASE_URL}${endpoint}`;
-    const token = await getTokenAction(); // Obtener el token almacenado
+    // const token = await getTokenAction(); // Obtener el token almacenado
 
     const defaultHeaders: HeadersInit = {
         'Accept': 'application/json',
@@ -43,15 +44,20 @@ async function request<T>(endpoint: string, options: ApiClientOptions = {}): Pro
     }
 
     // Añadir token de autorización si existe
-    if (token) {
-        defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
+    // if (token) {
+    //     defaultHeaders['Authorization'] = `Bearer ${token}`;
+    // }
 
     // Fusionar headers por defecto con los proporcionados en options
     options.headers = {
         ...defaultHeaders,
         ...options.headers,
     };
+
+    if (cookies) {
+        // Añadir cookies a los headers si se proporcionan
+        (options.headers as Record<string, string>)['Cookie'] = cookies;
+    }
 
     options.credentials = 'include'; // Incluir cookies en la solicitud
 
@@ -103,11 +109,11 @@ async function request<T>(endpoint: string, options: ApiClientOptions = {}): Pro
 
 // Exportar funciones específicas para métodos HTTP comunes
 export const apiClient = {
-    get: <T>(endpoint: string, options?: Omit<ApiClientOptions, 'body' | 'method'>) =>
-        request<T>(endpoint, { ...options, method: 'GET' }),
+    get: <T>(endpoint: string, options?: Omit<ApiClientOptions, 'body' | 'method'>, cookies?: string) =>
+        request<T>(endpoint, { ...options, method: 'GET' }, cookies),
 
-    post: <T>(endpoint: string, body?: any, options?: Omit<ApiClientOptions, 'body' | 'method'>) =>
-        request<T>(endpoint, { ...options, method: 'POST', body }),
+    post: <T>(endpoint: string, body?: any, options?: Omit<ApiClientOptions, 'body' | 'method'>, cookies?: string) =>
+        request<T>(endpoint, { ...options, method: 'POST', body }, cookies),
 
     put: <T>(endpoint: string, body?: any, options?: Omit<ApiClientOptions, 'body' | 'method'>) =>
         request<T>(endpoint, { ...options, method: 'PUT', body }),
