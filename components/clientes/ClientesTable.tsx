@@ -9,11 +9,14 @@ import {
     TableCell,
     DropdownItem,
     Pagination,
-    TextInput
+    TextInput,
+    Button
 } from 'flowbite-react';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { Icon } from "@iconify/react";
 import { useState } from 'react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import AddClientModal from './AddClientModal';
 
 const tableActionData = [
     {
@@ -43,7 +46,13 @@ interface IClientesTableProps {
 export default function ClientesTable({ clientes }: IClientesTableProps) {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [searchTerm, setSearchTerm] = useState<string>(''); // Estado para la búsqueda
-    const itemsPerPage = 10; // Cambia esto según tus necesidades
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+    const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
+    const itemsPerPage = 5; // Cambia esto según tus necesidades
+
+    // Detecta si la pantalla es pequeña
+    const isSmallScreen = useMediaQuery('(max-width: 640px)');
 
     // Filtrar clientes según el término de búsqueda
     const filteredClientes = clientes.filter((cliente) =>
@@ -64,10 +73,40 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
         setCurrentPage(1); // Reiniciar a la primera página al buscar
     };
 
+    const openCreateModal = () => {
+        setModalMode('create');
+        setSelectedClient(null);
+        setIsModalOpen(true);
+    };
+
+    const openEditModal = (client: Cliente) => {
+        setModalMode('edit');
+        setSelectedClient(client);
+        setIsModalOpen(true);
+    };
+
+    const handleSaveClient = (clientData: Cliente) => {
+        if (modalMode === 'create') {
+            console.log('Nuevo cliente añadido:', clientData);
+            // Lógica para añadir cliente
+        } else if (modalMode === 'edit') {
+            console.log('Cliente actualizado:', clientData);
+            // Lógica para actualizar cliente
+        }
+    };
+
     return (
         <>
             <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
-                <h5 className="card-title">Clientes</h5>
+                <div className="flex justify-between items-center mb-4">
+                    <h5 className="card-title">Clientes</h5>
+                    <Button
+                        onClick={openCreateModal}
+                        className="bg-primary text-white rounded-xl"
+                    >
+                        Añadir Cliente
+                    </Button>
+                </div>
                 {/* Campo de búsqueda */}
                 <div className="mb-4">
                     <TextInput
@@ -128,8 +167,9 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
                                 ))}
                             </TableBody>
                         </Table>
-                        <div className="flex overflow-x-auto sm:justify-center">
+                        <div className="flex overflow-x-auto sm:justify-center my-4">
                             <Pagination
+                                layout={isSmallScreen ? 'navigation' : 'pagination'}
                                 currentPage={currentPage}
                                 previousLabel='Anterior'
                                 nextLabel='Siguiente'
@@ -139,6 +179,14 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
                         </div>
                     </div>
                 </div>
+                {/* Modal para añadir o editar cliente */}
+                <AddClientModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSaveClient}
+                    initialData={selectedClient}
+                    mode={modalMode}
+                />
             </div>
         </>
     );
