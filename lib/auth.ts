@@ -1,8 +1,5 @@
 // lib/auth.ts
-// import { logoutAction } from './actions/auth.actions';
 import { apiClient } from './apiClient';
-import { setToken, removeToken } from './tokenStorage';
-
 // --- Tipos ---
 
 // Interfaz para el objeto User (ajusta según tu API)
@@ -52,7 +49,6 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
         const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
 
         if (response.token && response.user) {
-            setToken(response.token); // Guarda el token recibido
             return response.user;
         } else {
             if (response.message) {
@@ -77,19 +73,9 @@ export async function logoutUser(): Promise<void> {
 
         // Llama a tu endpoint de logout si tu API lo requiere (opcional)
         // Ejemplo: await apiClient.post('/auth/logout');
-        // Lo más importante es eliminar el token localmente
         await apiClient.post('/auth/logout');
-        // removeToken();
-        // logoutAction();
-        // removeCookie();
     } catch (error) {
         console.error('Error en logoutUser:', error);
-        // Aún si falla la llamada a la API, debemos limpiar el token local
-        // removeToken();
-        // logoutAction();
-        // removeCookie();
-        // Opcionalmente, puedes decidir si re-lanzar el error o no
-        // throw error;
     }
 }
 
@@ -105,7 +91,6 @@ export async function getCurrentUser(): Promise<User | null> {
         // Ajusta el endpoint a tu API.
         const response = await apiClient.get<LoginResponse>('/auth/me');
         if (response.token && response.user) {
-            // setToken(response.token); // Guarda el token recibido
             return response.user;
         } else {
             // Si la API devuelve 2xx pero no el token/user esperado
@@ -117,9 +102,6 @@ export async function getCurrentUser(): Promise<User | null> {
         // Por ahora, asumimos que cualquier error aquí significa no autenticado.
         // Puedes refinar esto verificando error.message o status code si es necesario.
         console.warn('No se pudo obtener el usuario actual (puede que no esté logueado):', error.message);
-        // removeToken(); // Limpiar token inválido si lo hubiera
-        // logoutAction();
-        // removeCookie(); // Limpiar cookie inválida si lo hubiera
         return null;
     }
 }

@@ -184,7 +184,12 @@ export default function LoginPage() {
                         ¿Olvidaste tu contraseña?
                     </Link>
                 </div>
-                <Button type="submit" color={"primary"} className="w-full bg-primary text-white rounded-xl">
+                <Button
+                    type="submit"
+                    color={"primary"}
+                    disabled={authLoading}
+                    className="w-full bg-primary text-white rounded-xl"
+                >
                     Ingresar
                 </Button>
             </form>

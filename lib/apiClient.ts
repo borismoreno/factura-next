@@ -1,14 +1,6 @@
 // lib/apiClient.ts
-// import { getTokenAction } from './actions/auth.actions';
 import { logoutUser } from './auth';
-// import { logoutUser } from './auth';
-// import { getToken } from './tokenStorage'; // Usaremos helpers para el token
 
-// --- Configuración ---
-// ¡IMPORTANTE! Es MUCHO mejor obtener esto de variables de entorno
-// Ejemplo: const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-// Usamos NEXT_PUBLIC_ para que esté disponible en el cliente.
-// Por ahora, lo dejamos hardcodeado según tu petición.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // --- Tipos ---
@@ -28,9 +20,7 @@ interface ApiClientOptions extends RequestInit {
  * @throws {Error} Si la respuesta no es exitosa (status code >= 400).
  */
 async function request<T>(endpoint: string, options: ApiClientOptions = {}, cookies?: string): Promise<T> {
-    console.log('API Client Request:', endpoint);
     const url = `${API_BASE_URL}${endpoint}`;
-    // const token = await getTokenAction(); // Obtener el token almacenado
 
     const defaultHeaders: HeadersInit = {
         'Accept': 'application/json',
@@ -42,12 +32,6 @@ async function request<T>(endpoint: string, options: ApiClientOptions = {}, cook
         // Serializar el body si no es FormData
         options.body = JSON.stringify(options.body);
     }
-
-    // Añadir token de autorización si existe
-    // if (token) {
-    //     defaultHeaders['Authorization'] = `Bearer ${token}`;
-    // }
-
     // Fusionar headers por defecto con los proporcionados en options
     options.headers = {
         ...defaultHeaders,
