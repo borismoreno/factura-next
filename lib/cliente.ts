@@ -1,31 +1,41 @@
+import { ICliente } from '@/types/Cliente';
 import { apiClient } from './apiClient';
-import { cookies } from 'next/headers';
 
-export interface Cliente {
-    _id: string;
-    activo: boolean;
-    razonSocial: string;
-    tipoIdentificacion: string;
-    numeroIdentificacion: string;
-    telefono: string;
-    mail: string;
-    direccion: string;
-}
-
-export async function getClientes(cookies?: string): Promise<Cliente[] | undefined> {
+export async function getClientes(cookies?: string): Promise<ICliente[] | undefined> {
     try {
-        const response = await apiClient.get<Cliente[]>('/cliente', undefined, cookies);
+        const response = await apiClient.get<ICliente[]>('/cliente', undefined, cookies);
         return response;
     } catch (error) {
-        // if (error instanceof Error) {
-        //     if (error.message.includes('Unauthorized')) {
-        //         await logoutUser();
-        //         return Promise.reject(new Error('Unauthorized. Please log in again.'));
-        //     }
-        // } else {
-        //     throw new Error('An unknown error occurred in the API client.');
-        // }
         console.error('Error fetching clientes:', error);
         throw new Error('Error fetching clientes');
+    }
+}
+
+export async function createCliente(cliente: ICliente): Promise<ICliente | undefined> {
+    try {
+        const response = await apiClient.post<ICliente>('/cliente', cliente);
+        return response;
+    } catch (error) {
+        console.error('Error creating cliente:', error);
+        throw new Error('Error creating cliente');
+    }
+}
+
+export async function updateCliente(cliente: ICliente): Promise<ICliente | undefined> {
+    try {
+        const response = await apiClient.put<ICliente>(`/cliente/${cliente._id}`, cliente);
+        return response;
+    } catch (error) {
+        console.error('Error updating cliente:', error);
+        throw new Error('Error updating cliente');
+    }
+}
+
+export async function deleteCliente(clienteId: string): Promise<void> {
+    try {
+        await apiClient.delete<void>(`/cliente/${clienteId}`);
+    } catch (error) {
+        console.error('Error deleting cliente:', error);
+        throw new Error('Error deleting cliente');
     }
 }

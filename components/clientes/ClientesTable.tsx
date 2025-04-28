@@ -10,49 +10,66 @@ import {
     DropdownItem,
     Pagination,
     TextInput,
-    Button
+    Button,
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Toast,
+    ToastToggle
 } from 'flowbite-react';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { Icon } from "@iconify/react";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import AddClientModal from './AddClientModal';
+import { ICliente } from '@/types/Cliente';
+import { createCliente, deleteCliente, getClientes, updateCliente } from '@/lib/cliente';
 
-const tableActionData = [
-    {
-        icon: "solar:pen-new-square-broken",
-        listtitle: "Editar",
-    },
-    {
-        icon: "solar:trash-bin-minimalistic-outline",
-        listtitle: "Eliminar",
-    },
-];
-
-export interface Cliente {
-    _id: string;
-    activo: boolean;
-    razonSocial: string;
-    tipoIdentificacion: string;
-    numeroIdentificacion: string;
-    telefono: string;
-    mail: string;
-    direccion: string;
+interface ITableAction {
+    icon: string;
+    listtitle: string;
+    action: (cliente: ICliente) => void;
 }
 
 interface IClientesTableProps {
-    clientes: Cliente[];
+    clientes: ICliente[];
 }
-export default function ClientesTable({ clientes }: IClientesTableProps) {
+export default function ClientesTable({ clientes: initialClientes }: IClientesTableProps) {
+    const [clientes, setClientes] = useState<ICliente[]>(initialClientes);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [searchTerm, setSearchTerm] = useState<string>(''); // Estado para la búsqueda
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-    const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
+    const [selectedClient, setSelectedClient] = useState<ICliente>();
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [toastType, setToastType] = useState<'success' | 'error'>('success');
     const itemsPerPage = 5; // Cambia esto según tus necesidades
+
+    // Función para obtener clientes desde el cliente
+    const fetchClientes = async () => {
+        try {
+            const updatedClientes = await getClientes(); // Llama a la función directamente
+            setClientes(updatedClientes || []);
+        } catch (error) {
+            showToast('Error al obtener los clientes', 'error');
+        }
+    };
+
+    useEffect(() => {
+        setClientes(initialClientes);
+    }, [initialClientes]);
 
     // Detecta si la pantalla es pequeña
     const isSmallScreen = useMediaQuery('(max-width: 640px)');
+
+    // Mostrar Toast
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToastMessage(message);
+        setToastType(type);
+        setTimeout(() => setToastMessage(null), 3000); // Ocultar el Toast después de 3 segundos
+    };
 
     // Filtrar clientes según el término de búsqueda
     const filteredClientes = clientes.filter((cliente) =>
@@ -75,25 +92,70 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
 
     const openCreateModal = () => {
         setModalMode('create');
-        setSelectedClient(null);
+        setSelectedClient(undefined);
         setIsModalOpen(true);
     };
 
-    const openEditModal = (client: Cliente) => {
+    const openEditModal = (client: ICliente) => {
         setModalMode('edit');
         setSelectedClient(client);
         setIsModalOpen(true);
     };
 
-    const handleSaveClient = (clientData: Cliente) => {
+    const openDeleteModal = (client: ICliente) => {
+        setSelectedClient(client);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleSaveClient = async (clientData: ICliente) => {
         if (modalMode === 'create') {
-            console.log('Nuevo cliente añadido:', clientData);
-            // Lógica para añadir cliente
+            const response = await createCliente(clientData);
+            if (response) {
+                showToast('Cliente creado con éxito', 'success');
+            } else {
+                showToast('Error al crear el cliente', 'error');
+            }
+            onSuccess();
         } else if (modalMode === 'edit') {
-            console.log('Cliente actualizado:', clientData);
-            // Lógica para actualizar cliente
+            const response = await updateCliente(clientData);
+            if (response) {
+                showToast('Cliente actualizado con éxito', 'success');
+            } else {
+                showToast('Error al crear el cliente', 'error');
+            }
+            onSuccess();
+        }
+
+    };
+    async function onSuccess() {
+        setIsModalOpen(false);
+        setSelectedClient(undefined);
+        setModalMode('create');
+        setIsDeleteModalOpen(false);
+        await fetchClientes();
+    }
+
+    const handleDeleteClient = async (client: ICliente) => {
+        if (selectedClient) {
+            await deleteCliente(selectedClient._id!);
+            onSuccess();
+            showToast('Cliente eliminado con éxito', 'success');
         }
     };
+
+    // Acciones de la tabla con tipado estricto
+    const tableActionData: ITableAction[] = [
+        {
+            icon: "solar:pen-new-square-broken",
+            listtitle: "Editar",
+            action: openEditModal,
+        },
+        {
+            icon: "solar:trash-bin-minimalistic-outline",
+            listtitle: "Eliminar",
+            action: openDeleteModal,
+        },
+    ];
 
     return (
         <>
@@ -155,7 +217,11 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
                                                 )}
                                             >
                                                 {tableActionData.map((action, index) => (
-                                                    <DropdownItem key={index} className="flex gap-3">
+                                                    <DropdownItem
+                                                        key={index}
+                                                        className="flex gap-3"
+                                                        onClick={() => action.action(cliente)}
+                                                    >
                                                         {' '}
                                                         <Icon icon={`${action.icon}`} height={18} />
                                                         <span>{action.listtitle}</span>
@@ -187,7 +253,43 @@ export default function ClientesTable({ clientes }: IClientesTableProps) {
                     initialData={selectedClient}
                     mode={modalMode}
                 />
+                {/* Modal de confirmación de eliminación */}
+                <Modal show={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
+                    <ModalHeader>Confirmar Eliminación</ModalHeader>
+                    <ModalBody>
+                        {selectedClient && (
+                            <p>
+                                ¿Estás seguro de que deseas eliminar al cliente{' '}
+                                <span className="font-bold">{selectedClient.razonSocial}</span>?
+                            </p>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="gray" onClick={() => setIsDeleteModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button color="failure" onClick={() => handleDeleteClient(selectedClient!)}>
+                            Eliminar
+                        </Button>
+                    </ModalFooter>
+                </Modal>
             </div>
+            {/* Toast para mensajes */}
+            {toastMessage && (
+                <div className="fixed bottom-4 right-4">
+                    <Toast>
+                        <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${toastType === 'success' ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
+                            {toastType === 'success' ? (
+                                <Icon icon="solar:check-circle-bold" height={24} />
+                            ) : (
+                                <Icon icon="solar:danger-circle-bold" height={24} />
+                            )}
+                        </div>
+                        <div className="ml-3 text-sm font-normal">{toastMessage}</div>
+                        <ToastToggle />
+                    </Toast>
+                </div>
+            )}
         </>
     );
 }
