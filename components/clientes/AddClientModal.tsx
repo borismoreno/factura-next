@@ -29,6 +29,7 @@ interface FormData {
     tipoIdentificacion: string;
     numeroIdentificacion: string;
     email: string;
+    direccion: string;
     telefono: string;
 }
 
@@ -47,6 +48,7 @@ const schema = yup.object().shape({
     tipoIdentificacion: yup.string().required('El tipo de identificación es obligatorio'),
     numeroIdentificacion: yup.string().required('La identificación es obligatoria'),
     email: yup.string().email('El correo no es válido').required('El correo es obligatorio'),
+    direccion: yup.string().required('La dirección es obligatoria'),
     telefono: yup.string().required('El teléfono es obligatorio'),
 });
 
@@ -63,6 +65,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
             tipoIdentificacion: '',
             numeroIdentificacion: '',
             email: '',
+            direccion: '',
             telefono: '',
         },
     });
@@ -75,6 +78,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                 tipoIdentificacion: initialData.tipoIdentificacion || '',
                 numeroIdentificacion: initialData.numeroIdentificacion || '',
                 email: initialData.mail || '',
+                direccion: initialData.direccion || '',
                 telefono: initialData.telefono || '',
             });
         } else {
@@ -83,6 +87,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                 tipoIdentificacion: '',
                 numeroIdentificacion: '',
                 email: '',
+                direccion: '',
                 telefono: '',
             });
         }
@@ -98,7 +103,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
             numeroIdentificacion: data.numeroIdentificacion,
             telefono: data.telefono,
             mail: data.email,
-            direccion: ''
+            direccion: data.direccion
         }); // Llama a la función onSave con los datos del formulario
         // onClose(); // Cierra el modal
         // reset(); // Limpia el formulario
@@ -117,9 +122,9 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                             type="text"
                             {...register('razonSocial')}
                             placeholder="Razón Social"
-                            className='rounded-md'
                             autoComplete='off'
                             color={errors.razonSocial ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
                         />
                         {errors.razonSocial && (
                             <HelperText>
@@ -134,6 +139,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                         <Select
                             {...register('tipoIdentificacion')}
                             color={errors.tipoIdentificacion ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
                         >
                             <option value="">Seleccione un tipo</option>
                             {identificationTypes.map((type) => (
@@ -158,6 +164,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                             placeholder="Identificación"
                             autoComplete='off'
                             color={errors.numeroIdentificacion ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
                         />
                         {errors.numeroIdentificacion && (
                             <HelperText>
@@ -175,10 +182,29 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                             placeholder="Correo Electrónico"
                             autoComplete='off'
                             color={errors.email ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
                         />
                         {errors.email && (
                             <HelperText>
                                 <span className="font-medium text-red-400">{errors.email?.message?.toString()}</span>
+                            </HelperText>
+                        )}
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Dirección
+                        </label>
+                        <TextInput
+                            type="text"
+                            {...register('direccion')}
+                            placeholder="Dirección"
+                            autoComplete='off'
+                            color={errors.direccion ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
+                        />
+                        {errors.direccion && (
+                            <HelperText>
+                                <span className="font-medium text-red-400">{errors.direccion?.message?.toString()}</span>
                             </HelperText>
                         )}
                     </div>
@@ -192,6 +218,7 @@ export default function AddClientModal({ isOpen, onClose, onSave, initialData, m
                             placeholder="Teléfono"
                             autoComplete='off'
                             color={errors.telefono ? 'failure' : 'gray'}
+                            className="form-control form-rounded-xl"
                         />
                         {errors.telefono && (
                             <HelperText>

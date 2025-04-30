@@ -25,6 +25,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import AddClientModal from './AddClientModal';
 import { ICliente } from '@/types/Cliente';
 import { createCliente, deleteCliente, getClientes, updateCliente } from '@/lib/cliente';
+import Loader from '../ui/Loader/Loader';
 
 interface ITableAction {
     icon: string;
@@ -39,8 +40,9 @@ export default function ClientesTable({ clientes: initialClientes }: IClientesTa
     const [clientes, setClientes] = useState<ICliente[]>(initialClientes);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [searchTerm, setSearchTerm] = useState<string>(''); // Estado para la búsqueda
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const [selectedClient, setSelectedClient] = useState<ICliente>();
     const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -49,11 +51,14 @@ export default function ClientesTable({ clientes: initialClientes }: IClientesTa
 
     // Función para obtener clientes desde el cliente
     const fetchClientes = async () => {
+        setLoading(true);
         try {
             const updatedClientes = await getClientes(); // Llama a la función directamente
             setClientes(updatedClientes || []);
         } catch (error) {
             showToast('Error al obtener los clientes', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -156,6 +161,14 @@ export default function ClientesTable({ clientes: initialClientes }: IClientesTa
             action: openDeleteModal,
         },
     ];
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-full">
+                <Loader message="Cargando clientes..." />
+            </div>
+        );
+    }
 
     return (
         <>
@@ -265,10 +278,10 @@ export default function ClientesTable({ clientes: initialClientes }: IClientesTa
                         )}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="gray" onClick={() => setIsDeleteModalOpen(false)}>
+                        <Button color="gray" className='rounded-xl' onClick={() => setIsDeleteModalOpen(false)}>
                             Cancelar
                         </Button>
-                        <Button color="failure" onClick={() => handleDeleteClient(selectedClient!)}>
+                        <Button color="failure" className='bg-error text-white rounded-xl' onClick={() => handleDeleteClient(selectedClient!)}>
                             Eliminar
                         </Button>
                     </ModalFooter>
