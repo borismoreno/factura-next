@@ -160,7 +160,7 @@ export default function ProductosTable() {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-full">
-                <Loader message="Cargando clientes..." />
+                <Loader message="Cargando productos..." />
             </div>
         );
     }
