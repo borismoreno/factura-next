@@ -20,130 +20,128 @@ import {
 } from 'flowbite-react';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { Icon } from "@iconify/react";
-import { useEffect, useState } from 'react';
+import { createProducto, deleteProducto, getProductos, updateProducto } from "@/lib/producto";
+import { IProducto } from "@/types/Producto";
+import { useEffect, useState } from "react";
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import AddClientModal from './AddClientModal';
-import { ICliente } from '@/types/Cliente';
-import { createCliente, deleteCliente, getClientes, updateCliente } from '@/lib/cliente';
 import Loader from '../ui/Loader/Loader';
+import AddProductoModal from './AddProductoModal';
 
 interface ITableAction {
     icon: string;
     listtitle: string;
-    action: (cliente: ICliente) => void;
+    action: (producto: IProducto) => void;
 }
 
-export default function ClientesTable() {
-    const [clientes, setClientes] = useState<ICliente[]>([]);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+export default function ProductosTable() {
     const [searchTerm, setSearchTerm] = useState<string>(''); // Estado para la búsqueda
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [productos, setProductos] = useState<IProducto[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-    const [selectedClient, setSelectedClient] = useState<ICliente>();
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
-    const itemsPerPage = 5; // Cambia esto según tus necesidades
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+    const [selectedProducto, setSelectedProducto] = useState<IProducto>();
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const itemsPerPage = 5;
 
-    // Función para obtener clientes desde el cliente
-    const fetchClientes = async () => {
+    const isSmallScreen = useMediaQuery('(max-width: 640px)');
+
+    const fetchProductos = async () => {
         setLoading(true);
         try {
-            const updatedClientes = await getClientes(); // Llama a la función directamente
-            setClientes(updatedClientes || []);
+            const updatedProductos = await getProductos(); // Llama a la función directamente
+            setProductos(updatedProductos || []);
         } catch (error) {
             showToast('Error al obtener los clientes', 'error');
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchClientes();
-    }, []);
-
-    // Detecta si la pantalla es pequeña
-    const isSmallScreen = useMediaQuery('(max-width: 640px)');
-
-    // Mostrar Toast
-    const showToast = (message: string, type: 'success' | 'error') => {
-        setToastMessage(message);
-        setToastType(type);
-        setTimeout(() => setToastMessage(null), 3000); // Ocultar el Toast después de 3 segundos
-    };
-
-    // Filtrar clientes según el término de búsqueda
-    const filteredClientes = clientes.filter((cliente) =>
-        Object.values(cliente).some((value) =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
-
-    const totalPages = Math.ceil(clientes.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentClientes = filteredClientes.slice(startIndex, endIndex);
-
-    const onPageChange = (page: number) => setCurrentPage(page);
+    }
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
         setCurrentPage(1); // Reiniciar a la primera página al buscar
     };
 
+    useEffect(() => {
+        fetchProductos();
+    }, []);
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToastMessage(message);
+        setToastType(type);
+        setTimeout(() => setToastMessage(null), 3000); // Ocultar el Toast después de 3 segundos
+    };
+
     const openCreateModal = () => {
         setModalMode('create');
-        setSelectedClient(undefined);
+        setSelectedProducto(undefined);
         setIsModalOpen(true);
     };
 
-    const openEditModal = (client: ICliente) => {
+    const openEditModal = (producto: IProducto) => {
         setModalMode('edit');
-        setSelectedClient(client);
+        setSelectedProducto(producto);
         setIsModalOpen(true);
     };
 
-    const openDeleteModal = (client: ICliente) => {
-        setSelectedClient(client);
+    const openDeleteModal = (producto: IProducto) => {
+        setSelectedProducto(producto);
         setIsDeleteModalOpen(true);
     };
 
-    const handleSaveClient = async (clientData: ICliente) => {
+    const handleDeleteProducto = async (producto: IProducto) => {
+        if (selectedProducto) {
+            await deleteProducto(selectedProducto._id!);
+            onSuccess();
+            showToast('Producto eliminado con éxito', 'success');
+        }
+    };
+
+    // Filtrar clientes según el término de búsqueda
+    const filteredProductos = productos.filter((productos) =>
+        Object.values(productos).some((value) =>
+            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    );
+
+    async function onSuccess() {
+        setIsModalOpen(false);
+        setSelectedProducto(undefined);
+        setModalMode('create');
+        setIsDeleteModalOpen(false);
+        await fetchProductos();
+    }
+
+    const handleSaveProducto = async (productoData: IProducto) => {
         if (modalMode === 'create') {
-            const response = await createCliente(clientData);
+            const response = await createProducto(productoData);
             if (response) {
-                showToast('Cliente creado con éxito', 'success');
+                showToast('Producto creado con éxito', 'success');
             } else {
-                showToast('Error al crear el cliente', 'error');
+                showToast('Error al crear el producto', 'error');
             }
             onSuccess();
         } else if (modalMode === 'edit') {
-            const response = await updateCliente(clientData);
+            const response = await updateProducto(productoData);
             if (response) {
-                showToast('Cliente actualizado con éxito', 'success');
+                showToast('Producto actualizado con éxito', 'success');
             } else {
-                showToast('Error al crear el cliente', 'error');
+                showToast('Error al actualizar el producto', 'error');
             }
             onSuccess();
         }
 
     };
-    async function onSuccess() {
-        setIsModalOpen(false);
-        setSelectedClient(undefined);
-        setModalMode('create');
-        setIsDeleteModalOpen(false);
-        await fetchClientes();
-    }
 
-    const handleDeleteClient = async (client: ICliente) => {
-        if (selectedClient) {
-            await deleteCliente(selectedClient._id!);
-            onSuccess();
-            showToast('Cliente eliminado con éxito', 'success');
-        }
-    };
+    const totalPages = Math.ceil(productos.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentProductos = filteredProductos.slice(startIndex, endIndex);
+
+    const onPageChange = (page: number) => setCurrentPage(page);
 
     // Acciones de la tabla con tipado estricto
     const tableActionData: ITableAction[] = [
@@ -171,12 +169,12 @@ export default function ClientesTable() {
         <>
             <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
                 <div className="flex justify-between items-center mb-4">
-                    <h5 className="card-title">Clientes</h5>
+                    <h5 className="card-title">Productos</h5>
                     <Button
                         onClick={openCreateModal}
                         className="bg-primary text-white rounded-xl"
                     >
-                        Añadir Cliente
+                        Añadir Producto
                     </Button>
                 </div>
                 {/* Campo de búsqueda */}
@@ -194,27 +192,31 @@ export default function ClientesTable() {
                         <Table hoverable>
                             <TableHead>
                                 <TableRow>
-                                    <TableHeadCell className="p-6 text-dark dark:text-lightgray">Razon Social</TableHeadCell>
-                                    <TableHeadCell>Identificación</TableHeadCell>
-                                    <TableHeadCell>Mail</TableHeadCell>
-                                    <TableHeadCell>Teléfono</TableHeadCell>
+                                    <TableHeadCell className="p-6 text-dark dark:text-lightgray">Descripción</TableHeadCell>
+                                    <TableHeadCell>Código Principal</TableHeadCell>
+                                    <TableHeadCell>Tipo Producto</TableHeadCell>
+                                    <TableHeadCell>Tarifa IVA</TableHeadCell>
+                                    <TableHeadCell>Valor unitario</TableHeadCell>
                                     <TableHeadCell></TableHeadCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody className="divide-y divide-border dark:divide-darkborder">
-                                {currentClientes?.map((cliente, index) => (
+                                {currentProductos?.map((producto, index) => (
                                     <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800" key={index}>
                                         <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white capitalize">
-                                            {cliente.razonSocial.toLowerCase()}
+                                            {producto.descripcion.toLocaleLowerCase()}
                                         </TableCell>
                                         <TableCell>
-                                            {cliente.numeroIdentificacion}
+                                            {producto.codigoPrincipal}
                                         </TableCell>
                                         <TableCell>
-                                            {cliente.mail}
+                                            {producto.tipoProductoDescripcion}
                                         </TableCell>
                                         <TableCell>
-                                            {cliente.telefono}
+                                            {producto.tarifaIvaDescripcion}
+                                        </TableCell>
+                                        <TableCell>
+                                            {producto.valorUnitario.toFixed(2)}
                                         </TableCell>
                                         <TableCell>
                                             <Dropdown
@@ -230,7 +232,7 @@ export default function ClientesTable() {
                                                     <DropdownItem
                                                         key={index}
                                                         className="flex gap-3"
-                                                        onClick={() => action.action(cliente)}
+                                                        onClick={() => action.action(producto)}
                                                     >
                                                         {' '}
                                                         <Icon icon={`${action.icon}`} height={18} />
@@ -256,21 +258,21 @@ export default function ClientesTable() {
                     </div>
                 </div>
                 {/* Modal para añadir o editar cliente */}
-                <AddClientModal
+                <AddProductoModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onSave={handleSaveClient}
-                    initialData={selectedClient}
+                    onSave={handleSaveProducto}
+                    initialData={selectedProducto}
                     mode={modalMode}
                 />
                 {/* Modal de confirmación de eliminación */}
                 <Modal show={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
                     <ModalHeader>Confirmar Eliminación</ModalHeader>
                     <ModalBody>
-                        {selectedClient && (
+                        {selectedProducto && (
                             <p>
                                 ¿Estás seguro de que deseas eliminar al cliente{' '}
-                                <span className="font-bold">{selectedClient.razonSocial}</span>?
+                                <span className="font-bold">{selectedProducto.descripcion}</span>?
                             </p>
                         )}
                     </ModalBody>
@@ -278,7 +280,7 @@ export default function ClientesTable() {
                         <Button color="gray" className='rounded-xl' onClick={() => setIsDeleteModalOpen(false)}>
                             Cancelar
                         </Button>
-                        <Button color="failure" className='bg-error text-white rounded-xl' onClick={() => handleDeleteClient(selectedClient!)}>
+                        <Button color="failure" className='bg-error text-white rounded-xl' onClick={() => handleDeleteProducto(selectedProducto!)}>
                             Eliminar
                         </Button>
                     </ModalFooter>

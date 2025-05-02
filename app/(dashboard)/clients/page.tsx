@@ -1,5 +1,5 @@
-import ClientesServer from "@/components/clientes/ClientesServer";
+import ClientesTable from "@/components/clientes/ClientesTable";
 
 export default function Page() {
-    return (<ClientesServer />);
+    return (<ClientesTable />);
 }
